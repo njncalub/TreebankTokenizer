@@ -51,6 +51,7 @@ class TreebankTokenizer {
     [/([:,])([^\d])/g, " $1 $2"],
     [/([:,])$/g, " $1 "],
     [/\.\.\./g, " ... "],
+    [/…/g, " … "],
     [/([;@#$%&])/g, " $1 "],
     [/([^\.])(\.)([\]\)}>\"\']*)\s*$/, "$1 $2$3 "], // Handles the final period.
     [/([?!])/g, " $1 "],
@@ -70,7 +71,11 @@ class TreebankTokenizer {
     [/}/, "-RCB-"],
   ];
 
-  readonly DOUBLE_DASHES: [RegExp, string] = [/--/, " -- "];
+  readonly DOUBLE_DASHES: [RegExp, string][] = [
+    [/--/g, " -- "],
+    [/–/g, " – "],
+    [/—/g, " — "],
+  ];
 
   // ending quotes
   readonly ENDING_QUOTES: [RegExp, string][] = [
@@ -120,9 +125,11 @@ class TreebankTokenizer {
       }
     }
 
-    // Handles double dash
-    var [regexp, substitution] = [...this.DOUBLE_DASHES];
-    text = text.replace(regexp, substitution);
+    // Handles double dashes
+    for (let dash of this.DOUBLE_DASHES) {
+      var [regexp, substitution] = [...dash];
+      text = text.replace(regexp, substitution);
+    }
 
     // add extra space to make things easier
     text = " " + text + " ";
